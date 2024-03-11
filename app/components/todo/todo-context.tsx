@@ -3,57 +3,65 @@ import { ReactNode, createContext, useContext, useState } from "react";
 import { Task } from "../../types/types";
 import { v4 as uuidv4 } from "uuid";
 
+export const filters = {
+  all: "all",
+  completed: "completed",
+  incompleted: "incompleted",
+  inprogress: "inprogress",
+};
+
+export type Filters = keyof typeof filters;
+
 type ToDoContextType = {
   todos: Task[];
   addNewToDo: (todo: string) => void;
   deleteToDo: (id: string) => void;
-  toggleCompletedToDo: (id: string) => void;
-  filterValue: string;
-  setFilterValue: (value: string) => void;
-  filterTasks: (status: string) => void;
+  filterTasks: (status: Filters) => void;
   filteredTodos: Task[];
+  toggleStatus: (id: string, status: Task["status"]) => void;
 };
 
-export const ToDoContext = createContext<ToDoContextType | {}>({});
+export const ToDoContext = createContext<ToDoContextType | null>(null);
 
 export function ToDoProvider({ children }: { children: ReactNode }) {
   const [todos, setTodos] = useState<Task[]>([]);
-  const [filterValue, setFilterValue] = useState("all");
+  const [filterValue, setFilterValue] = useState<Filters>("all");
 
   const addNewToDo = (todo: string) => {
-    setTodos([...todos, { id: uuidv4(), title: todo, completed: false }]);
+    setTodos([...todos, { id: uuidv4(), title: todo, status: "pending" }]);
   };
 
-  const deleteToDo = (id: string) => {
+  const deleteToDo: ToDoContextType["deleteToDo"] = (id: string) => {
     setTodos(todos.filter((todo) => todo.id !== id));
   };
 
-  const toggleCompletedToDo = (id: string) => {
+  const toggleStatus: ToDoContextType["toggleStatus"] = (id, status) => {
     setTodos(
-      todos.map((todo) =>
-        todo.id === id ? { ...todo, completed: !todo.completed } : todo
-      )
+      todos.map((todo) => (todo.id === id ? { ...todo, status } : todo))
     );
   };
 
-  const filterTasks = (status: string) => setFilterValue(status);
+  const filterTasks = (status: Filters) => setFilterValue(status);
   const filteredTodos = todos.filter((todo) => {
     if (filterValue === "completed") {
-      return todo.completed;
+      return todo.status === "completed";
     } else if (filterValue === "incompleted") {
-      return !todo.completed;
+      return todo.status !== "completed";
+    } else if (filterValue === "inprogress") {
+      return todo.status === "inprogress";
     }
     return true;
   });
+
   return (
     <ToDoContext.Provider
       value={{
         todos,
         addNewToDo,
         deleteToDo,
-        toggleCompletedToDo,
         filterTasks,
         filteredTodos,
+        toggleStatus,
       }}
     >
       {children}

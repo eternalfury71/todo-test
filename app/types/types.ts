@@ -1,7 +1,7 @@
 export type Task = {
   id: string;
   title: string;
-  completed: boolean;
+  status: "completed" | "inprogress" | "pending";
 };
 
 export type NewToDo = {
