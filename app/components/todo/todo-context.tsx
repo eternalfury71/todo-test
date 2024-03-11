@@ -8,12 +8,17 @@ type ToDoContextType = {
   addNewToDo: (todo: string) => void;
   deleteToDo: (id: string) => void;
   toggleCompletedToDo: (id: string) => void;
+  filterValue: string;
+  setFilterValue: (value: string) => void;
+  filterTasks: (status: string) => void;
+  filteredTodos: Task[];
 };
 
 export const ToDoContext = createContext<ToDoContextType | {}>({});
 
 export function ToDoProvider({ children }: { children: ReactNode }) {
   const [todos, setTodos] = useState<Task[]>([]);
+  const [filterValue, setFilterValue] = useState("all");
 
   const addNewToDo = (todo: string) => {
     setTodos([...todos, { id: uuidv4(), title: todo, completed: false }]);
@@ -31,6 +36,15 @@ export function ToDoProvider({ children }: { children: ReactNode }) {
     );
   };
 
+  const filterTasks = (status: string) => setFilterValue(status);
+  const filteredTodos = todos.filter((todo) => {
+    if (filterValue === "completed") {
+      return todo.completed;
+    } else if (filterValue === "incompleted") {
+      return !todo.completed;
+    }
+    return true;
+  });
   return (
     <ToDoContext.Provider
       value={{
@@ -38,6 +52,10 @@ export function ToDoProvider({ children }: { children: ReactNode }) {
         addNewToDo,
         deleteToDo,
         toggleCompletedToDo,
+        filterTasks,
+        filteredTodos,
+        filterValue,
+        setFilterValue,
       }}
     >
       {children}
@@ -48,7 +66,7 @@ export function ToDoProvider({ children }: { children: ReactNode }) {
 export function useTodo() {
   const context = useContext(ToDoContext);
   if (!context) {
-    throw new Error("useTodo must be used within a ToDoProvider");
+    throw new Error("Error");
   }
   return context as ToDoContextType;
 }
