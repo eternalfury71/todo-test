@@ -54,8 +54,6 @@ export function ToDoProvider({ children }: { children: ReactNode }) {
         toggleCompletedToDo,
         filterTasks,
         filteredTodos,
-        filterValue,
-        setFilterValue,
       }}
     >
       {children}

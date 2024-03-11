@@ -1,12 +1,10 @@
 "use client";
 import { ToDoForm } from "./todo-form";
 import { ToDoTask } from "./todo-task";
-import { ToDoProvider, useTodo } from "./todo-context";
-import { useState } from "react";
+import { useTodo } from "./todo-context";
 
 export function ToDoWrapper() {
-  const { todos, filterTasks, filterValue, setFilterValue, filteredTodos } =
-    useTodo();
+  const { filterTasks, filteredTodos } = useTodo();
   return (
     <>
       <ToDoForm />

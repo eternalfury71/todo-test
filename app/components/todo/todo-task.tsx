@@ -8,7 +8,6 @@ export function ToDoTask({ title, id, completed }: Task) {
   const [modalOpen, setModalOpen] = useState(false);
   const openModal = () => setModalOpen(true);
   const closeModal = () => setModalOpen(false);
-
   const handleDelete = () => {
     deleteToDo(id);
     closeModal();
