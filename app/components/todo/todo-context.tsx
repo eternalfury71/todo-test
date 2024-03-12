@@ -54,7 +54,11 @@ export function ToDoProvider({ children }: { children: ReactNode }) {
   };
 
   const toggleStatus: ToDoContextType["toggleStatus"] = async (id, status) => {
-    const response = await changeStatus(id, status, todos);
+    const taskToUpdate = todos.find((todo) => todo.id === id);
+    if (!taskToUpdate) {
+      return;
+    }
+    const response = await changeStatus(id, status, taskToUpdate);
 
     if (response === null) {
       return;

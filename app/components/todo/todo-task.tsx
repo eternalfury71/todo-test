@@ -1,23 +1,17 @@
 "use client";
 import { Task } from "@/app/types/types";
 import { useTodo } from "./todo-context";
-import { useEffect, useState } from "react";
+import { useRef, useState } from "react";
 import { GrInProgress } from "react-icons/gr";
-
+import Modal, { ModalRef } from "./modal";
+import { createPortal } from "react-dom";
 export function ToDoTask({ title, id, status }: Task) {
-  const { deleteToDo, toggleStatus } = useTodo();
-  const [modalOpen, setModalOpen] = useState(false);
-  const openModal = () => setModalOpen(true);
-  const closeModal = () => setModalOpen(false);
+  const { toggleStatus, deleteToDo } = useTodo();
+  const openModalRef = useRef<ModalRef>(null);
   const handleDelete = () => {
     deleteToDo(id);
-    closeModal();
+    openModalRef.current?.closeModal();
   };
-
-  useEffect(() => {
-    document.body.style.overflow = modalOpen ? "hidden" : "auto";
-  }, [modalOpen]);
-
   const handleInProgress = () => {
     if (status === "inprogress") toggleStatus(id, "pending");
     else if (status === "pending") toggleStatus(id, "inprogress");
@@ -55,26 +49,17 @@ export function ToDoTask({ title, id, status }: Task) {
           checked={status === "completed"}
         />
         <button
-          onClick={openModal}
+          onClick={() => openModalRef.current?.openModal()}
           className="bg-red-500 p-2 rounded-md text-white text-md hover:bg-red-600"
         >
           Delete
         </button>
       </div>
-      {modalOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 overflow-hidden">
-          <div className="bg-white p-6 rounded-lg shadow-lg w-84 max-w-lg">
-            <p className="mb-4">Are you sure you want to delete this item?</p>
-            <div className="flex justify-center space-x-8">
-              <button onClick={handleDelete} className="btn text-green-500">
-                Confirm
-              </button>
-              <button onClick={closeModal} className="btn text-red-500">
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
+      {createPortal(
+        <Modal onConfirm={handleDelete} ref={openModalRef}>
+          <p className="mb-6">Are you sure you want to delete this task?</p>
+        </Modal>,
+        document.getElementById("modal-root") || document.body
       )}
     </div>
   );

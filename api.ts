@@ -1,6 +1,5 @@
 import axios from "axios";
 import { Task } from "./app/types/types";
-import { ToDoContextType } from "./app/components/todo/todo-context";
 
 const baseUrl = "http://localhost:3001";
 
@@ -33,10 +32,9 @@ export const deleteTask = async (id: Task["id"]): Promise<Task | null> => {
 export const changeStatus = async (
   id: Task["id"],
   status: Task["status"],
-  todos: Task[]
+  taskToUpdate: Task
 ) => {
   try {
-    const taskToUpdate = todos.find((todo) => todo.id === id);
     const { data } = await axios.put<Task>(`${baseUrl}/tasks/${id}`, {
       ...taskToUpdate,
       status,
