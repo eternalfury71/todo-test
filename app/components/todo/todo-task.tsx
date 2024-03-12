@@ -15,14 +15,7 @@ export function ToDoTask({ title, id, status }: Task) {
   };
 
   useEffect(() => {
-    if (modalOpen) {
-      document.body.style.overflow = "hidden"; // Prevent scrolling
-    } else {
-      document.body.style.overflow = "auto"; // Re-enable scrolling
-    }
-    return () => {
-      document.body.style.overflow = "auto";
-    };
+    document.body.style.overflow = modalOpen ? "hidden" : "auto";
   }, [modalOpen]);
 
   const handleInProgress = () => {

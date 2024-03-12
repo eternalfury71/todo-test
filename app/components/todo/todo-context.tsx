@@ -1,7 +1,14 @@
 "use client";
-import { ReactNode, createContext, useContext, useState } from "react";
+import {
+  ReactNode,
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import { Task } from "../../types/types";
 import { v4 as uuidv4 } from "uuid";
+import { changeStatus, deleteTask, getAllTasks, postNewTask } from "@/api";
 
 export const filters = {
   all: "all",
@@ -12,7 +19,7 @@ export const filters = {
 
 export type Filters = keyof typeof filters;
 
-type ToDoContextType = {
+export type ToDoContextType = {
   todos: Task[];
   addNewToDo: (todo: string) => void;
   deleteToDo: (id: string) => void;
@@ -27,15 +34,32 @@ export function ToDoProvider({ children }: { children: ReactNode }) {
   const [todos, setTodos] = useState<Task[]>([]);
   const [filterValue, setFilterValue] = useState<Filters>("all");
 
-  const addNewToDo = (todo: string) => {
-    setTodos([...todos, { id: uuidv4(), title: todo, status: "pending" }]);
+  useEffect(() => {
+    const fetchData = async () => {
+      const fetchedTodos = await getAllTasks();
+      setTodos(fetchedTodos);
+    };
+    fetchData();
+  }, []);
+
+  const addNewToDo = async (todo: string) => {
+    const newTodo = { id: uuidv4(), title: todo, status: "pending" as const };
+    postNewTask(newTodo);
+    setTodos([...todos, newTodo]);
   };
 
-  const deleteToDo: ToDoContextType["deleteToDo"] = (id: string) => {
+  const deleteToDo: ToDoContextType["deleteToDo"] = async (id: string) => {
+    const deletedTask = deleteTask(id);
     setTodos(todos.filter((todo) => todo.id !== id));
   };
 
-  const toggleStatus: ToDoContextType["toggleStatus"] = (id, status) => {
+  const toggleStatus: ToDoContextType["toggleStatus"] = async (id, status) => {
+    const response = await changeStatus(id, status, todos);
+
+    if (response === null) {
+      return;
+    }
+
     setTodos(
       todos.map((todo) => (todo.id === id ? { ...todo, status } : todo))
     );
